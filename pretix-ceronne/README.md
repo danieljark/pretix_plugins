@@ -25,6 +25,9 @@ diese Oberflächen liefert das Plugin.
   „Ursprünglicher Preis … · Neuer Preis …“
 
   ![Auswahl mit Varianten und Gutschein](../docs/shop-auswahl.png)
+- **Gutschein ohne Verlust der Auswahl:** Feld „Gutscheincode“ direkt in „Deine Auswahl“. Die gewählten Plätze (inkl.
+  Variante) merkt sich der Browser für die Veranstaltung und stellt sie nach dem Einlösen wieder her – auch beim
+  pretix-eigenen Feld „Gutschein einlösen“
 - **Live:** belegte Plätze werden im Hintergrund alle paar Sekunden aktualisiert, ohne die Seite neu zu laden;
   wird ein gerade gewählter Platz von jemand anderem gebucht, wird er abgewählt und es erscheint ein Hinweis
 - **Ganzer Saal auf einen Blick:** Der Plan passt immer in das Fenster, ohne zu scrollen. Zoomen mit + / −,

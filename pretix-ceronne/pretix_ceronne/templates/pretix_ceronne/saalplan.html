@@ -83,6 +83,18 @@
         <p class="cs-auswahl__leer">Noch kein Platz ausgewählt.</p>
         <ul class="cs-auswahl__liste"></ul>
       </div>
+      <div class="cs-gutscheinfeld cs-nur-js">
+        {% if daten.gutschein %}
+          <p class="cs-gutschein-aktiv">Gutschein <strong>{{ daten.gutschein }}</strong> ist aktiv – die Preise sind bereits angepasst.</p>
+        {% else %}
+          <label for="cs-gutscheincode">Gutscheincode</label>
+          <div class="cs-gutscheinfeld__zeile">
+            <input type="text" id="cs-gutscheincode" class="form-control" autocomplete="off" autocapitalize="characters" spellcheck="false">
+            <button type="button" class="btn btn-default" id="cs-gutschein-einloesen">Einlösen</button>
+          </div>
+          <p class="cs-gutscheinfeld__hilfe">Deine gewählten Plätze bleiben dabei erhalten.</p>
+        {% endif %}
+      </div>
       <button type="submit" class="btn btn-primary btn-lg btn-block cs-absenden">In den Warenkorb</button>
     </aside>
     {% endif %}

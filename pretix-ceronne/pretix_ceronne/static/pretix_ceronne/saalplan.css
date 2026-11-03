@@ -70,3 +70,11 @@
   .cs-layout { grid-template-columns: minmax(0, 1fr) 320px; }
   .cs-layout__auswahl { position: sticky; top: 1em; }
 }
+
+.cs-gutscheinfeld { border-top: 1px solid #e3e8ee; margin: .8em 0; padding-top: .8em; }
+.cs-gutscheinfeld label { font-weight: 600; margin-bottom: .3em; }
+.cs-gutscheinfeld__zeile { display: flex; gap: .4em; }
+.cs-gutscheinfeld__zeile .form-control { min-height: 44px; text-transform: uppercase; }
+.cs-gutscheinfeld__zeile .btn { min-height: 44px; }
+.cs-gutscheinfeld__hilfe { color: #555; font-size: .85em; margin: .3em 0 0; }
+.cs-gutschein-aktiv { background: #eaf5ee; border-radius: 6px; margin: 0; padding: .5em .7em; }

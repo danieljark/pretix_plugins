@@ -584,6 +584,52 @@
 
     aktualisiere();
 
+    // Auswahl für diese Veranstaltung im Browser merken (sessionStorage), damit sie beim Einlösen eines Gutscheins
+    // nicht verloren geht. Wiederhergestellt werden nur Plätze, die noch frei sind; die Variante (z. B. Ermäßigt)
+    // steckt im Feldnamen seat_<produkt>_<variante>.
+    if (!admin && d.veranstaltung) {
+      var speicherSchluessel = 'cs-auswahl-' + d.veranstaltung;
+      var speichern = function () {
+        try {
+          var a = auswahl();
+          sessionStorage.setItem(speicherSchluessel, JSON.stringify(Object.keys(a).map(function (g) { return [g, kaestchen[g].name]; })));
+        } catch (e) { /* Speicher nicht verfügbar (z. B. privates Fenster): dann eben ohne */ }
+      };
+      try {
+        var gemerkt = JSON.parse(sessionStorage.getItem(speicherSchluessel) || '[]');
+        var wieder = 0;
+        gemerkt.forEach(function (e) {
+          var c = sitzVon[e[0]], p = pos[e[0]];
+          if (!c || !c._frei || !p) return;
+          var k = kasten(p);
+          if (new RegExp('^seat_' + p.i + '(_\\d+)?$').test(e[1])) k.name = e[1];
+          k.checked = true;
+          wieder++;
+        });
+        if (wieder) aktualisiere();
+      } catch (e) { /* ungültiger Eintrag: ignorieren */ }
+      wurzel.addEventListener('cs-auswahl', speichern);
+      wurzel.addEventListener('change', speichern);
+      var formular2 = wurzel.closest('form');
+      if (formular2) formular2.addEventListener('submit', function () {
+        try { sessionStorage.removeItem(speicherSchluessel); } catch (e) { /* egal */ }
+      });
+      var einloesen = document.getElementById('cs-gutschein-einloesen');
+      var codeFeld = document.getElementById('cs-gutscheincode');
+      if (einloesen && codeFeld && d.einloesen_url) {
+        var los = function () {
+          var code = codeFeld.value.trim();
+          if (!code) { codeFeld.focus(); return; }
+          speichern();
+          window.location.href = d.einloesen_url + '?voucher=' + encodeURIComponent(code);
+        };
+        einloesen.addEventListener('click', los);
+        codeFeld.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); los(); } });
+      }
+      // Auch das pretix-eigene Feld „Gutschein einlösen“ auf der Seite: vorher die Auswahl sichern
+      document.querySelectorAll('form[action$="/redeem"]').forEach(function (f) { f.addEventListener('submit', speichern); });
+    }
+
     // Live: im Hintergrund alle paar Sekunden nur den Platzstatus holen und die Plätze umfärben – kein Neuladen
     if (!admin && d.status_url) {
       var laeuft = false;

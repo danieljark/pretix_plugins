@@ -74,6 +74,9 @@ def saalplan_im_shop(sender, request, subevent=None, voucher=None, **kwargs):
     daten = saalplan_daten(sender, request, voucher)
     if not daten['gutschein_platz']:
         daten['status_url'] = eventreverse(sender, 'plugins:pretix_ceronne:status')
+    daten['veranstaltung'] = sender.pk
+    daten['einloesen_url'] = eventreverse(sender, 'presale:event.redeem')
+    daten['gutschein'] = voucher.code if voucher is not None else None
     gruppen = {}
     for p in daten['plaetze']:
         if p['s'] == 'frei':
