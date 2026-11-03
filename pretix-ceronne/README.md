@@ -16,10 +16,12 @@ diese Oberflächen liefert das Plugin.
 - **Barrierefrei:** jeder Platz ist für Screenreader ein Kontrollkästchen mit Platz, Kategorie und Preis;
   geprüft mit axe-core (WCAG 2.2 AA) ohne Befund
 - **Ganze Tische** per Klick auf das Tischschild
-- **Plätze vorschlagen:** Anzahl Personen eingeben, das Plugin wählt passende Plätze nebeneinander
-- **Varianten** je Platz, z. B. „Standard 80 € / Ermäßigt 70 €“. Die Beschreibung der Variante (z. B. wer ermäßigte
-  Tickets nutzen darf) steht als Hinweis über dem Plan und beim gewählten Platz
-- Gewählte Plätze erscheinen wie ein Ticket: Produkt, Platz, Ticketart, Beschreibung, Preis – mit Gutschein
+- **Plätze vorschlagen** (je Veranstaltung einschaltbar, standardmäßig aus): Anzahl Personen eingeben, das Plugin
+  wählt passende Plätze nebeneinander
+- **Varianten** je Platz, z. B. „Standard 80 € / Ermäßigt 70 €“; die Beschreibung der Variante (z. B. wer ermäßigte
+  Tickets nutzen darf) erscheint beim gewählten Platz
+- **„Deine Auswahl“ rechts neben dem Plan** mit dem Knopf „In den Warenkorb“ (läuft beim Scrollen mit; auf dem Handy
+  unter dem Plan). Gewählte Plätze erscheinen wie ein Ticket: Produkt, Platz, Ticketart, Beschreibung, Preis – mit Gutschein
   „Ursprünglicher Preis … · Neuer Preis …“
 
   ![Auswahl mit Varianten und Gutschein](../docs/shop-auswahl.png)

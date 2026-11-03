@@ -59,5 +59,14 @@
 .cs-posten__preis { font-weight: 600; margin-top: .3em; }
 .cs-posten .cs-entfernen { padding-left: 0; }
 
-.cs-varianten-hinweis { background: #eef4fa; border-left: 4px solid #0f4d80; margin: .6em 0 1em; padding: .5em .9em; }
-.cs-varianten-hinweis p { margin: .2em 0; }
+
+
+/* Plan links, „Deine Auswahl“ mit Warenkorb-Knopf rechts daneben (läuft beim Scrollen mit); schmal untereinander */
+.cs-layout { display: grid; gap: 1.2em; grid-template-columns: minmax(0, 1fr); }
+.cs-layout__auswahl { align-self: start; background: #fff; border: 1px solid #d5dde5; border-radius: 8px; padding: .8em 1em; }
+.cs-layout__auswahl h4 { margin-top: 0; }
+.cs-layout__auswahl .cs-auswahl__liste { grid-template-columns: minmax(0, 1fr); max-height: 60vh; overflow-y: auto; }
+@media (min-width: 992px) {
+  .cs-layout { grid-template-columns: minmax(0, 1fr) 320px; }
+  .cs-layout__auswahl { position: sticky; top: 1em; }
+}

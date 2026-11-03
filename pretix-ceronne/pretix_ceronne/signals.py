@@ -83,14 +83,7 @@ def saalplan_im_shop(sender, request, subevent=None, voucher=None, **kwargs):
                 for v in vs
             ] if vs else [{'name': f'seat_{p["i"]}', 'text': p['l'], 'variante': ''}]
             gruppen.setdefault(p['t'], []).append(p)
-    # Hinweise zu Varianten mit Beschreibung (z. B. wer ermäßigte Tickets nutzen darf)
-    hinweise = {}
-    for vs in daten['varianten'].values():
-        for v in vs:
-            if v.get('beschreibung'):
-                hinweise.setdefault(v['name'], v['beschreibung'])
     return get_template('pretix_ceronne/saalplan.html').render({
-        'hinweise': hinweise,
         'daten': daten,
         'gruppen': gruppen,
         'frei': sum(1 for p in daten['plaetze'] if p['s'] == 'frei'),

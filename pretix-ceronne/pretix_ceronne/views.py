@@ -165,6 +165,7 @@ class SaalplanView(EventPermissionRequiredMixin, TemplateView):
         s.ceronne_tischmodus = modus if modus in dict(TISCHMODI) else 'beides'
         s.ceronne_luecken = self.request.POST.get('luecken') == 'on'
         s.ceronne_restplatz = self.request.POST.get('restplatz') == 'on'
+        s.ceronne_vorschlag = self.request.POST.get('vorschlag') == 'on'
 
     def _entfernen(self):
         event = self.request.event

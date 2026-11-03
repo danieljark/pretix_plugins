@@ -186,7 +186,7 @@ def saalplan_daten(event, request=None, voucher=None, admin=False, mit_namen=Tru
         'varianten': {str(k): v for k, v in produkt_varianten.items() if v},
         'produkte': produkt_infos,
         # Gutschein mit festem Platz: keine Lücken-/Tischregeln, der Platz ist vorgegeben
-        'regeln': {'tischmodus': 'einzeln', 'luecken': False, 'restplatz': False} if gutschein_platz else einstellungen(event),
+        'regeln': {'tischmodus': 'einzeln', 'luecken': False, 'restplatz': False, 'vorschlag': False} if gutschein_platz else einstellungen(event),
         'gutschein_platz': gutschein_platz,
         'modus': 'admin' if admin else 'shop',
     }

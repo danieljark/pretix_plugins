@@ -20,6 +20,8 @@ def einstellungen(event):
         'tischmodus': event.settings.get('ceronne_tischmodus', default='beides'),
         'luecken': event.settings.get('ceronne_luecken', as_type=bool, default=True),
         'restplatz': event.settings.get('ceronne_restplatz', as_type=bool, default=False),
+        # „Plätze vorschlagen“ (Anzahl Personen → passende Plätze) – standardmäßig aus
+        'vorschlag': event.settings.get('ceronne_vorschlag', as_type=bool, default=False),
     }
 
 
