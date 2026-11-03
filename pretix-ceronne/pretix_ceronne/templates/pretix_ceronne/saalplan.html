@@ -1,0 +1,81 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'pretix_ceronne/saalplan.css' %}">
+<section class="cs-saalplan" aria-labelledby="cs-titel">
+  <h3 id="cs-titel">Platz wählen</h3>
+  {% if frei %}
+    <div class="cs-hilfe" id="cs-hilfe">
+      {% if daten.gutschein_platz %}<p><strong>Dein Gutschein gilt für einen festen Platz – er ist bereits ausgewählt.</strong></p>{% endif %}
+      <p><span class="cs-frei-zahl">{{ frei }}</span> Plätze sind frei.
+        {% if regeln.tischmodus == 'nur_tische' %}Bei dieser Veranstaltung werden nur <strong>ganze Tische</strong> verkauft – ein Klick wählt den ganzen Tisch.
+        {% else %}Klicke im Saalplan auf einen freien Platz{% if regeln.tischmodus == 'beides' %} oder auf ein Tischschild für den ganzen Tisch{% endif %}.{% endif %}
+        <span class="cs-nur-js">Mit der Tastatur: Tab führt in den Plan, die Pfeiltasten wechseln den Platz,
+        Leertaste oder Enter wählt ihn aus{% if regeln.tischmodus == 'beides' %}, T wählt den ganzen Tisch{% endif %}.</span>
+      </p>
+      {% if regeln.luecken or regeln.restplatz %}
+        <p class="cs-regeln">Bitte beachten:
+          {% if regeln.luecken %}Zwischen zwei belegten Plätzen darf kein einzelner Platz frei bleiben.{% endif %}
+          {% if regeln.restplatz %}An einem Tisch darf nicht genau ein Platz frei bleiben.{% endif %}
+        </p>
+      {% endif %}
+    </div>
+  {% else %}
+    <p class="cs-hilfe"><strong>Für diese Veranstaltung sind keine Plätze mehr frei.</strong></p>
+  {% endif %}
+
+  <ul class="cs-legende" aria-label="Legende">
+    {% for k in daten.kategorien %}
+      {% if k.preis %}
+        <li><svg class="cs-punkt" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="{{ k.farbe }}" stroke="#333" stroke-width="2.5"/></svg>{{ k.name }}: {{ k.preis }}</li>
+      {% endif %}
+    {% endfor %}
+    <li><svg class="cs-punkt" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="#0f4d80" stroke="#0f4d80" stroke-width="4"/></svg>ausgewählt</li>
+    <li><svg class="cs-punkt" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="#c4c4c4" stroke="#888" stroke-width="2"/><path d="M5 5l10 10m0-10l-10 10" stroke="#666" stroke-width="2"/></svg>belegt / nicht buchbar</li>
+  </ul>
+
+  {% if frei and regeln.tischmodus != 'nur_tische' and not daten.gutschein_platz %}
+  <div class="cs-vorschlag cs-nur-js">
+    <label for="cs-anzahl">Plätze für</label>
+    <input type="number" id="cs-anzahl" min="1" max="20" value="2" class="form-control">
+    <span>Personen</span>
+    <button type="button" class="btn btn-default" id="cs-vorschlagen">Plätze vorschlagen</button>
+  </div>
+  {% endif %}
+
+  <div class="cs-werkzeuge cs-nur-js">
+    <button type="button" class="btn btn-default cs-zoom" data-zoom="1.5" aria-label="Plan vergrößern">+</button>
+    <button type="button" class="btn btn-default cs-zoom" data-zoom="0.6667" aria-label="Plan verkleinern">−</button>
+    <button type="button" class="btn btn-default cs-zoom" data-zoom="0">Ganzer Saal</button>
+  </div>
+  <div class="cs-flaeche cs-nur-js" id="cs-flaeche"></div>
+  {{ daten|json_script:"cs-daten" }}
+
+  {% if frei %}
+  <details class="cs-liste" id="cs-liste">
+    <summary>Plätze als Liste auswählen</summary>
+    {% for tisch, plaetze in gruppen.items %}
+      <fieldset>
+        <legend>Tisch {{ tisch }}</legend>
+        {% if regeln.tischmodus != 'einzeln' %}
+          <button type="button" class="btn btn-link cs-nur-js cs-tisch-knopf" data-tisch="{{ tisch }}">Ganzen Tisch {{ tisch }} wählen ({{ plaetze|length }} Plätze)</button>
+        {% endif %}
+        {% for p in plaetze %}
+          {% for o in p.optionen %}
+            <label class="cs-option{% if not forloop.first %} cs-variante-zusatz{% endif %}">
+              <input type="checkbox" name="{{ o.name }}" value="{{ p.g }}" data-guid="{{ p.g }}" data-variante="{{ o.variante }}"{% if forloop.first and p.g == daten.gutschein_platz %} checked{% endif %}>
+              {{ o.text }}
+            </label>
+          {% endfor %}
+        {% endfor %}
+      </fieldset>
+    {% endfor %}
+  </details>
+
+  <div class="cs-meldung" role="alert" hidden></div>
+  <div class="cs-auswahl" aria-live="polite">
+    <p class="cs-auswahl__leer">Noch kein Platz ausgewählt.</p>
+    <ul class="cs-auswahl__liste"></ul>
+  </div>
+  <button type="submit" class="btn btn-primary btn-lg cs-absenden">In den Warenkorb</button>
+  {% endif %}
+</section>
+<script src="{% static 'pretix_ceronne/saalplan.js' %}" defer></script>

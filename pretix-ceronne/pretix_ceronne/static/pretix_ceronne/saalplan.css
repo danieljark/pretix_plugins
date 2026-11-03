@@ -1,0 +1,54 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later – Copyright (C) 2026 Club Céronne im ETV Hamburg e.V. */
+/* Céronne Saalplan im Shop. Farben: Vereinsblau #0f4d80. */
+.cs-saalplan { margin: 0 0 2em; }
+.cs-hilfe { max-width: 60em; }
+.cs-saalplan:not(.cs-js) .cs-nur-js { display: none; }
+
+.cs-legende { display: flex; flex-wrap: wrap; gap: .4em 1.4em; list-style: none; margin: .5em 0 1em; padding: 0; }
+.cs-legende li { align-items: center; display: flex; gap: .4em; }
+.cs-punkt { flex: none; height: 1.2em; width: 1.2em; }
+
+.cs-werkzeuge { display: flex; gap: .4em; margin-bottom: .4em; }
+.cs-werkzeuge .btn { min-height: 44px; min-width: 44px; }
+
+.cs-flaeche { border: 1px solid #ccc; border-radius: 6px; max-height: 80vh; overflow: auto; background: #fff; }
+.cs-svg { display: block; height: auto; width: 100%; }
+.cs-flaeche-form { fill-opacity: .18; }
+.cs-text { font-family: inherit; pointer-events: none; }
+
+.cs-sitz { stroke: #333; stroke-width: 1.5; }
+.cs-sitz--frei { cursor: pointer; }
+.cs-sitz--frei:hover { stroke: #0f4d80; stroke-width: 4; }
+.cs-sitz--frei:focus { outline: none; }
+.cs-sitz--frei:focus-visible { stroke: #000; stroke-width: 5; }
+.cs-sitz--gewaehlt { fill: #0f4d80 !important; stroke: #0f4d80; stroke-width: 5; paint-order: stroke; }
+.cs-sitz--belegt { stroke: #888; }
+.cs-kreuz { pointer-events: none; stroke: #666; stroke-width: 2; }
+
+.cs-liste { margin: 1em 0; }
+.cs-liste summary { cursor: pointer; font-weight: 600; min-height: 44px; padding: .6em 0; }
+.cs-liste fieldset { border: 0; margin: 0 0 .6em; padding: 0; }
+.cs-liste legend { border: 0; font-size: 1em; font-weight: 600; margin: 0 0 .2em; }
+.cs-option { display: inline-flex; align-items: center; gap: .3em; font-weight: normal; margin: 0 1em .3em 0; min-height: 32px; }
+
+.cs-auswahl { margin: 1em 0; }
+.cs-auswahl__liste { margin: 0; padding-left: 1.2em; }
+.cs-entfernen { padding: 0 .3em; }
+
+.cs-regeln { color: #333; }
+.cs-meldung { background: #fdecea; border-left: 4px solid #b71c1c; color: #7f1010; margin: 1em 0; padding: .6em .9em; }
+.cs-vorschlag { align-items: center; display: flex; flex-wrap: wrap; gap: .5em; margin: 0 0 .8em; }
+.cs-vorschlag .form-control { width: 5em; }
+.cs-vorschlag .btn, .cs-vorschlag .form-control { min-height: 44px; }
+.cs-schild { cursor: pointer; }
+.cs-schild:hover { fill: #0f4d80; fill-opacity: .35; }
+.cs-tisch-knopf { display: block; padding-left: 0; }
+.cs-sitz--verkauft { stroke: #1b5e20; }
+.cs-sitz--blockiert { fill: #fff !important; stroke: #000; stroke-width: 4; stroke-dasharray: 4 3; }
+.cs-absenden[disabled] { cursor: not-allowed; opacity: .55; }
+.cs-sitz--gutschein { stroke: #8a3000; }
+.cs-gutschein { border: 1px solid #ddd; border-radius: 6px; margin: .6em 0 1em; padding: .8em; }
+.cs-gutschein .cs-flaeche { max-height: 60vh; }
+.cs-gewaehlt:empty { display: none; }
+.cs-variante { display: inline-block; margin: .2em .4em; min-height: 36px; width: auto; }
+.cs-auswahl__liste li { margin-bottom: .3em; }

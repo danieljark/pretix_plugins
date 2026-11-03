@@ -1,0 +1,90 @@
+{% extends "pretixcontrol/event/base.html" %}
+{% load static %}
+{% block title %}Saalplan – Belegung{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'pretix_ceronne/saalplan.css' %}">
+<h1>Belegung</h1>
+{% if not daten %}
+  <div class="alert alert-info">Diese Veranstaltung hat noch keinen Saalplan.</div>
+{% else %}
+<p>
+  <strong>{{ zaehler.verkauft|default:0 }}</strong> verkauft ·
+  <strong>{{ zaehler.gutschein|default:0 }}</strong> für Gutscheine reserviert ·
+  <strong>{{ zaehler.frei|default:0 }}</strong> frei ·
+  <strong>{{ zaehler.warenkorb|default:0 }}</strong> gerade im Warenkorb ·
+  <strong>{{ zaehler.blockiert|default:0 }}</strong> gesperrt ·
+  <strong>{{ zaehler.gesperrt|default:0 }}</strong> ohne Produkt (nicht buchbar)
+</p>
+
+<p class="cs-drucken">
+  <a class="btn btn-default" href="{% url 'plugins:pretix_ceronne:saalliste' organizer=request.event.organizer.slug event=request.event.slug %}" target="_blank" rel="noopener"><i class="fa fa-print" aria-hidden="true"></i> Saalliste (PDF, Tisch für Tisch mit Namen)</a>
+  <a class="btn btn-default" href="{% url 'plugins:pretix_ceronne:saalplan_pdf' organizer=request.event.organizer.slug event=request.event.slug %}" target="_blank" rel="noopener"><i class="fa fa-print" aria-hidden="true"></i> Saalplan A4 (schwarz-weiß, belegt grau)</a>
+  <a class="btn btn-default" href="{% url 'plugins:pretix_ceronne:saalplan_pdf' organizer=request.event.organizer.slug event=request.event.slug %}?format=A3" target="_blank" rel="noopener">Saalplan A3 quer</a>
+</p>
+
+<form method="post" class="cs-saalplan cs-admin">
+  {% csrf_token %}
+  <h2 id="cs-titel" class="h3">Plätze sperren</h2>
+  <p class="cs-hilfe" id="cs-hilfe">Klicke auf freie Plätze, um sie für den Verkauf zu sperren (z. B. Ehrengäste, Technik), und auf
+    gesperrte, um sie wieder freizugeben. Danach speichern. Verkaufte Plätze zeigen beim Darüberfahren Bestellung und Name, reservierte den Gutscheincode.</p>
+  <ul class="cs-legende" aria-label="Legende">
+    {% for k in daten.kategorien %}
+      <li><svg class="cs-punkt" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="{{ k.farbe }}" stroke="#333" stroke-width="2.5"/></svg>{{ k.name }} frei</li>
+    {% endfor %}
+    <li><svg class="cs-punkt" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="#2e7d32" stroke="#1b5e20" stroke-width="2"/></svg>verkauft</li>
+    <li><svg class="cs-punkt" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="#e65100" stroke="#8a3000" stroke-width="2"/></svg>für Gutschein reserviert</li>
+    <li><svg class="cs-punkt" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="#fff" stroke="#000" stroke-width="2"/><path d="M5 10h10" stroke="#000" stroke-width="3"/></svg>gesperrt</li>
+    <li><svg class="cs-punkt" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="#c4c4c4" stroke="#888" stroke-width="2"/><path d="M5 5l10 10m0-10l-10 10" stroke="#666" stroke-width="2"/></svg>Warenkorb / nicht buchbar</li>
+  </ul>
+  <div class="cs-werkzeuge">
+    <button type="button" class="btn btn-default cs-zoom" data-zoom="1.5" aria-label="Plan vergrößern">+</button>
+    <button type="button" class="btn btn-default cs-zoom" data-zoom="0.6667" aria-label="Plan verkleinern">−</button>
+    <button type="button" class="btn btn-default cs-zoom" data-zoom="0">Ganzer Saal</button>
+  </div>
+  <div class="cs-flaeche" id="cs-flaeche"></div>
+  {{ daten|json_script:"cs-daten" }}
+  <div class="cs-sperren" hidden>
+    {% for p in daten.plaetze %}
+      {% if p.s == 'frei' or p.s == 'blockiert' %}
+        <input type="checkbox" name="gesperrt" value="{{ p.g }}" data-guid="{{ p.g }}"{% if p.s == 'blockiert' %} checked{% endif %}>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <div class="form-group submit-group">
+    <button type="submit" class="btn btn-primary btn-save">Sperren speichern</button>
+  </div>
+</form>
+
+<h2 class="h3">Für Gutscheine reservierte Plätze</h2>
+<p>Ein Platz wird im Gutschein unter „Bestimmter Sitzplatz“ reserviert. Er bleibt belegt, bis der Gutschein eingelöst,
+  gelöscht oder abgelaufen ist.</p>
+{% if reserviert %}
+<table class="table table-condensed table-hover">
+  <thead><tr><th>Tisch</th><th>Platz</th><th>Gutschein</th></tr></thead>
+  <tbody>
+  {% for p in reserviert %}
+    <tr><td>{{ p.t }}</td><td>{{ p.l }}</td><td><a href="{{ p.u }}">{{ p.o }}</a></td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <p>Keine.</p>
+{% endif %}
+
+<h2 class="h3">Verkaufte Plätze</h2>
+{% if verkauft %}
+<table class="table table-condensed table-hover">
+  <thead><tr><th>Tisch</th><th>Platz</th><th>Bestellung</th><th>Name</th><th>Status</th></tr></thead>
+  <tbody>
+  {% for p in verkauft %}
+    <tr><td>{{ p.t }}</td><td>{{ p.l }}</td><td><a href="{{ p.u }}">{{ p.o }}</a></td><td>{{ p.n }}</td>
+      <td>{% if p.bezahlt %}bezahlt{% else %}offen{% endif %}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <p>Noch keine Plätze verkauft.</p>
+{% endif %}
+<script src="{% static 'pretix_ceronne/saalplan.js' %}" defer></script>
+{% endif %}
+{% endblock %}

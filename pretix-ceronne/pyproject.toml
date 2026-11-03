@@ -1,0 +1,37 @@
+[project]
+name = "pretix-ceronne"
+dynamic = ["version"]
+description = "Saalplan mit Platzwahl für pretix (Club Céronne)"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "AGPL-3.0-or-later"}
+authors = [{name = "Club Céronne im ETV Hamburg e.V."}]
+keywords = ["pretix", "seating", "saalplan", "sitzplan", "tickets"]
+classifiers = [
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Framework :: Django",
+    "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+Homepage = "https://github.com/danieljark/pretix_plugins"
+Source = "https://github.com/danieljark/pretix_plugins/tree/main/pretix-ceronne"
+
+[project.entry-points."pretix.plugin"]
+pretix_ceronne = "pretix_ceronne:PretixPluginMeta"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "pretix_ceronne.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["pretix_ceronne*"]
+
+[tool.setuptools.package-data]
+pretix_ceronne = ["templates/**/*", "static/**/*"]
