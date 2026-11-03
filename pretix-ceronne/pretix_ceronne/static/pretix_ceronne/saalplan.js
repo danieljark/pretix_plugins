@@ -278,28 +278,54 @@
       if (admin) return;
       liste.textContent = '';
       var ids = Object.keys(a);
+      var produkte = d.produkte || {};
       ids.forEach(function (g) {
         var p = pos[g];
-        var li = document.createElement('li');
         var vs = varianten[p.i];
-        li.textContent = p.l + ' (' + p.k + (vs ? '' : (preis[p.k] ? ', ' + preis[p.k] : '')) + ') ';
+        var info = produkte[p.i] || {};
+        var k = kaestchen[g];
+        // Posten wie auf dem Ticket: Produkt, Platz, ggf. Variante mit Beschreibung, Preis (mit Gutschein: alt/neu)
+        var li = document.createElement('li');
+        li.className = 'cs-posten';
+        var titel = document.createElement('strong');
+        titel.textContent = info.name || p.k;
+        li.appendChild(titel);
+        var platz = document.createElement('div');
+        platz.textContent = p.l.replace(/, /g, ' – ');
+        li.appendChild(platz);
+        var beschreibung = document.createElement('div');
+        beschreibung.className = 'cs-posten__text';
+        var preisZeile = document.createElement('div');
+        preisZeile.className = 'cs-posten__preis';
+        function zeigePreis(x) {
+          beschreibung.textContent = x.beschreibung || '';
+          beschreibung.hidden = !x.beschreibung;
+          preisZeile.textContent = x.preis_neu
+            ? 'Ursprünglicher Preis: ' + x.preis + ' · Neuer Preis: ' + x.preis_neu
+            : 'Preis: ' + (x.preis || '');
+        }
         if (vs) {
           // Variante je Platz (z. B. Standard/Ermäßigt) – bestimmt den Feldnamen seat_<produkt>_<variante>
-          var k = kaestchen[g];
           var wahl = document.createElement('select');
           wahl.className = 'form-control cs-variante';
-          wahl.setAttribute('aria-label', 'Preis für ' + p.l);
+          wahl.setAttribute('aria-label', 'Ticketart für ' + p.l);
+          var gewaehlt = vs[0];
           vs.forEach(function (v) {
             var o = document.createElement('option');
             o.value = v.id;
-            o.textContent = v.name + ' ' + v.preis;
-            o.selected = k.name === 'seat_' + p.i + '_' + v.id;
+            o.textContent = v.name + ' – ' + (v.preis_neu || v.preis);
+            if (k.name === 'seat_' + p.i + '_' + v.id) { o.selected = true; gewaehlt = v; }
             wahl.appendChild(o);
           });
-          wahl.addEventListener('change', function () { k.name = 'seat_' + p.i + '_' + wahl.value; });
+          wahl.addEventListener('change', function () {
+            k.name = 'seat_' + p.i + '_' + wahl.value;
+            zeigePreis(vs.filter(function (v) { return String(v.id) === wahl.value; })[0]);
+          });
           li.appendChild(wahl);
-          li.appendChild(document.createTextNode(' '));
-        }
+          zeigePreis(gewaehlt);
+        } else zeigePreis(info);
+        li.appendChild(beschreibung);
+        li.appendChild(preisZeile);
         var b = document.createElement('button');
         b.type = 'button';
         b.className = 'btn btn-link cs-entfernen';
@@ -344,7 +370,8 @@
     function fokus(c) {
       sitze.forEach(function (s) { if (s._frei) s.setAttribute('tabindex', '-1'); });
       c.setAttribute('tabindex', '0');
-      c.focus();
+      sichtbarMachen(c._p);
+      c.focus({ preventScroll: true });
     }
 
     // Pfeiltasten: nächster freier Platz in der jeweiligen Richtung
@@ -361,9 +388,18 @@
       return best;
     }
 
+    var gezogen = false, letzterZeiger = 'mouse', sichtbarMachen = function () {};
     gruppe.addEventListener('click', function (e) {
+      if (gezogen) { gezogen = false; return; }
       var c = e.target.closest('.cs-sitz--frei');
-      if (c) { fokus(c); umschalten(c); }
+      if (!c) return;
+      // Auf dem Handy sind die Plätze in der Gesamtansicht zu klein zum Treffen: erst heranzoomen
+      if (letzterZeiger === 'touch' && r * pixelJeEinheit() < 9) {
+        var p = planPunkt(e.clientX, e.clientY);
+        zoomUm(3, p[0], p[1]);
+        return;
+      }
+      fokus(c); umschalten(c);
     });
     gruppe.addEventListener('keydown', function (e) {
       var c = e.target.closest('.cs-sitz--frei');
@@ -390,7 +426,7 @@
         var s = schilder[t];
         if (!s || !freieAmTisch(t).length) return;
         s.classList.add('cs-schild');
-        s.addEventListener('click', function () { tischUmschalten(t); });
+        s.addEventListener('click', function () { if (gezogen) { gezogen = false; return; } tischUmschalten(t); });
       });
       // Schilder liegen in der Deko-Gruppe; Klicks auf den Text sollen das Schild treffen
       if (deko) deko.style.pointerEvents = 'auto';
@@ -449,19 +485,93 @@
       });
     }
 
-    // Zoom: Breite des SVG ändern, der Rahmen scrollt
-    var faktor = 1;
-    function setzeZoom(f) {
-      faktor = Math.max(1, Math.min(6, f));
-      svg.style.width = (faktor * 100) + '%';
+    // Ansicht: Der ganze Saal passt immer in den Rahmen. Zoomen per Knopf, Strg/⌘ + Mausrad oder zwei Fingern
+    // (Trackpad, Handy), gezoomt lässt sich der Plan per Ziehen verschieben. Gezoomt wird über die viewBox –
+    // weder der Rahmen noch die Seite scrollen seitlich.
+    var basis = sichtbarerBereich(d), ansicht = basis.slice();
+    function setzeAnsicht(v) {
+      var w = Math.min(basis[2], Math.max(basis[2] / 12, v[2]));
+      var h = w * basis[3] / basis[2];
+      var x = Math.min(basis[0] + basis[2] - w, Math.max(basis[0], v[0]));
+      var y = Math.min(basis[1] + basis[3] - h, Math.max(basis[1], v[1]));
+      ansicht = [x, y, w, h];
+      svg.setAttribute('viewBox', ansicht.join(' '));
+      flaeche.classList.toggle('cs-gezoomt', w < basis[2] - 0.5);
     }
+    function zoomUm(f, px, py) {
+      var w = Math.min(basis[2], Math.max(basis[2] / 12, ansicht[2] / f)), k = w / ansicht[2];
+      setzeAnsicht([px - (px - ansicht[0]) * k, py - (py - ansicht[1]) * k, w, ansicht[3] * k]);
+    }
+    function planPunkt(cx, cy) {
+      var pt = svg.createSVGPoint(); pt.x = cx; pt.y = cy;
+      var q = pt.matrixTransform(svg.getScreenCTM().inverse());
+      return [q.x, q.y];
+    }
+    function pixelJeEinheit() { return svg.getScreenCTM().a; }
+    function hoeheAnpassen() {
+      var anteil = wurzel.classList.contains('cs-gutschein') ? 0.6 : 0.78;
+      var h = Math.min(window.innerHeight * anteil, flaeche.clientWidth * basis[3] / basis[2]);
+      flaeche.style.height = Math.max(220, Math.round(h)) + 'px';
+    }
+    hoeheAnpassen();
+    window.addEventListener('resize', hoeheAnpassen);
+    setzeAnsicht(basis);
+    sichtbarMachen = function (p) {
+      if (p.x < ansicht[0] || p.x > ansicht[0] + ansicht[2] || p.y < ansicht[1] || p.y > ansicht[1] + ansicht[3]) {
+        setzeAnsicht([p.x - ansicht[2] / 2, p.y - ansicht[3] / 2, ansicht[2], ansicht[3]]);
+      }
+    };
     wurzel.querySelectorAll('.cs-zoom').forEach(function (b) {
       b.addEventListener('click', function () {
         var z = parseFloat(b.dataset.zoom);
-        setzeZoom(z ? faktor * z : 1);
+        if (z) zoomUm(z, ansicht[0] + ansicht[2] / 2, ansicht[1] + ansicht[3] / 2);
+        else setzeAnsicht(basis);
       });
     });
-    if (flaeche.clientWidth < 600) setzeZoom(2);
+    svg.addEventListener('wheel', function (e) {
+      if (!e.ctrlKey && !e.metaKey) return; // normales Scrollen bleibt Scrollen der Seite
+      e.preventDefault();
+      var p = planPunkt(e.clientX, e.clientY);
+      zoomUm(Math.exp(-e.deltaY * 0.0025), p[0], p[1]);
+    }, { passive: false });
+    var zeiger = {}, geste = null;
+    function gesteStarten() {
+      var ids = Object.keys(zeiger);
+      if (ids.length === 1) {
+        var a = zeiger[ids[0]];
+        geste = { x: a[0], y: a[1], v: ansicht.slice(), proPixel: 1 / pixelJeEinheit() };
+      } else if (ids.length === 2) {
+        var p1 = zeiger[ids[0]], p2 = zeiger[ids[1]];
+        geste = { abstand: Math.hypot(p1[0] - p2[0], p1[1] - p2[1]) || 1, v: ansicht.slice(),
+                  mitte: planPunkt((p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2) };
+      } else geste = null;
+    }
+    svg.addEventListener('pointerdown', function (e) {
+      letzterZeiger = e.pointerType;
+      zeiger[e.pointerId] = [e.clientX, e.clientY];
+      gezogen = false;
+      gesteStarten();
+    });
+    svg.addEventListener('pointermove', function (e) {
+      if (!zeiger[e.pointerId] || !geste) return;
+      zeiger[e.pointerId] = [e.clientX, e.clientY];
+      var ids = Object.keys(zeiger);
+      if (ids.length === 2 && geste.abstand) {
+        var p1 = zeiger[ids[0]], p2 = zeiger[ids[1]];
+        ansicht = geste.v.slice();
+        zoomUm(Math.hypot(p1[0] - p2[0], p1[1] - p2[1]) / geste.abstand, geste.mitte[0], geste.mitte[1]);
+        gezogen = true;
+      } else if (ids.length === 1 && geste.proPixel) {
+        var dx = e.clientX - geste.x, dy = e.clientY - geste.y;
+        if (!gezogen && Math.hypot(dx, dy) < 6) return;
+        if (!flaeche.classList.contains('cs-gezoomt')) return;
+        gezogen = true;
+        setzeAnsicht([geste.v[0] - dx * geste.proPixel, geste.v[1] - dy * geste.proPixel, geste.v[2], geste.v[3]]);
+      }
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (t) {
+      svg.addEventListener(t, function (e) { delete zeiger[e.pointerId]; gesteStarten(); });
+    });
 
     aktualisiere();
 

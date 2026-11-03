@@ -57,6 +57,10 @@
           werkzeuge.appendChild(b);
         });
         wurzel.appendChild(werkzeuge);
+        var zh = document.createElement('p');
+        zh.className = 'cs-zoom-hinweis';
+        zh.textContent = 'Zoomen mit + und −, Strg/⌘ + Mausrad oder zwei Fingern; vergrößert lässt sich der Plan verschieben.';
+        wurzel.appendChild(zh);
         var flaeche = document.createElement('div');
         flaeche.className = 'cs-flaeche';
         wurzel.appendChild(flaeche);

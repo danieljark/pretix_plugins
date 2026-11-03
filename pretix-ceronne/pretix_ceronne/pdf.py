@@ -2,8 +2,10 @@
 # Copyright (C) 2026 Club Céronne im ETV Hamburg e.V.
 """PDFs für vor Ort: Saalliste (Tisch für Tisch mit Namen) und Saalplan in Schwarz-Weiß (belegt = grau)."""
 from io import BytesIO
+from zoneinfo import ZoneInfo
 
 from django.utils.formats import date_format
+from django.utils.timezone import localtime
 from reportlab.lib.pagesizes import A3, A4, landscape
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
@@ -32,7 +34,8 @@ def _kopf(c, event, titel, breite, hoehe):
     c.setFont('Helvetica-Bold', 14)
     c.drawString(15 * mm, hoehe - 15 * mm, f'{event.name} – {titel}')
     c.setFont('Helvetica', 9)
-    c.drawString(15 * mm, hoehe - 20 * mm, date_format(event.date_from, 'DATETIME_FORMAT'))
+    beginn = localtime(event.date_from, ZoneInfo(event.settings.timezone))  # Ortszeit der Veranstaltung, nicht UTC
+    c.drawString(15 * mm, hoehe - 20 * mm, date_format(beginn, 'DATETIME_FORMAT') + ' Uhr')
     return hoehe - 28 * mm
 
 
@@ -42,7 +45,7 @@ def saalliste(event, daten):
     breite, hoehe = A4
     c = canvas.Canvas(puffer, pagesize=A4, pageCompression=1)
     c.setTitle(f'Saalliste {event.name}')
-    spalten = [15 * mm, 30 * mm, 100 * mm, 130 * mm, 160 * mm]
+    spalten = [15 * mm, 30 * mm, 92 * mm, 115 * mm, 150 * mm]
     y = _kopf(c, event, 'Saalliste', breite, hoehe)
     seite = 1
 
@@ -76,10 +79,12 @@ def saalliste(event, daten):
             c.drawString(spalten[1], y, name[:42])
             c.setFont('Helvetica', 9.5)
             c.drawString(spalten[2], y, p.get('o') or '')
-            c.drawString(spalten[3], y, p['k'][:16])
+            c.drawString(spalten[3], y, (p['k'] + (f' · {p["v"]}' if p.get('v') else ''))[:20])
             status = STATUS_TEXT.get(p['s'], p['s'])
             if p['s'] == 'verkauft' and not p.get('bezahlt'):
                 status = 'offen'
+            if p.get('nachweis'):
+                status = (status + ' · ' if status else '') + 'Nachweis prüfen'
             c.drawString(spalten[4], y, status)
             # Abhak-Kästchen für den Einlass
             if p['s'] == 'verkauft':

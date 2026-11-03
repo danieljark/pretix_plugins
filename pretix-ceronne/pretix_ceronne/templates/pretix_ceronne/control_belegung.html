@@ -41,6 +41,7 @@
     <button type="button" class="btn btn-default cs-zoom" data-zoom="0.6667" aria-label="Plan verkleinern">−</button>
     <button type="button" class="btn btn-default cs-zoom" data-zoom="0">Ganzer Saal</button>
   </div>
+  <p class="cs-zoom-hinweis cs-nur-js">Zoomen mit + und −, Strg/⌘ + Mausrad oder zwei Fingern; vergrößert lässt sich der Plan mit der Maus oder dem Finger verschieben.</p>
   <div class="cs-flaeche" id="cs-flaeche"></div>
   {{ daten|json_script:"cs-daten" }}
   <div class="cs-sperren" hidden>
@@ -74,10 +75,10 @@
 <h2 class="h3">Verkaufte Plätze</h2>
 {% if verkauft %}
 <table class="table table-condensed table-hover">
-  <thead><tr><th>Tisch</th><th>Platz</th><th>Bestellung</th><th>Name</th><th>Status</th></tr></thead>
+  <thead><tr><th>Tisch</th><th>Platz</th><th>Ticket</th><th>Bestellung</th><th>Name</th><th>Status</th></tr></thead>
   <tbody>
   {% for p in verkauft %}
-    <tr><td>{{ p.t }}</td><td>{{ p.l }}</td><td><a href="{{ p.u }}">{{ p.o }}</a></td><td>{{ p.n }}</td>
+    <tr><td>{{ p.t }}</td><td>{{ p.l }}</td><td>{{ p.k }}{% if p.v %} · {{ p.v }}{% endif %}{% if p.nachweis %} <strong>(Nachweis prüfen)</strong>{% endif %}</td><td><a href="{{ p.u }}">{{ p.o }}</a></td><td>{{ p.n }}</td>
       <td>{% if p.bezahlt %}bezahlt{% else %}offen{% endif %}</td></tr>
   {% endfor %}
   </tbody>

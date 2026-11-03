@@ -17,12 +17,19 @@ diese Oberflächen liefert das Plugin.
   geprüft mit axe-core (WCAG 2.2 AA) ohne Befund
 - **Ganze Tische** per Klick auf das Tischschild
 - **Plätze vorschlagen:** Anzahl Personen eingeben, das Plugin wählt passende Plätze nebeneinander
-- **Varianten** je Platz, z. B. „Standard 80 € / Ermäßigt 70 €“
+- **Varianten** je Platz, z. B. „Standard 80 € / Ermäßigt 70 €“. Die Beschreibung der Variante (z. B. wer ermäßigte
+  Tickets nutzen darf) steht als Hinweis über dem Plan und beim gewählten Platz
+- Gewählte Plätze erscheinen wie ein Ticket: Produkt, Platz, Ticketart, Beschreibung, Preis – mit Gutschein
+  „Ursprünglicher Preis … · Neuer Preis …“
 
-  ![Auswahl mit Varianten](../docs/shop-auswahl.png)
+  ![Auswahl mit Varianten und Gutschein](../docs/shop-auswahl.png)
 - **Live:** belegte Plätze werden im Hintergrund alle paar Sekunden aktualisiert, ohne die Seite neu zu laden;
   wird ein gerade gewählter Platz von jemand anderem gebucht, wird er abgewählt und es erscheint ein Hinweis
-- Handy: Plan startet vergrößert, Zoom-Knöpfe, scrollt im Rahmen
+- **Ganzer Saal auf einen Blick:** Der Plan passt immer in das Fenster, ohne zu scrollen. Zoomen mit + / −,
+  Strg/⌘ + Mausrad oder zwei Fingern (Trackpad, Handy); vergrößert lässt er sich per Ziehen verschieben
+- **Handy:** Der ganze Saal passt in die Breite; der erste Tipp auf einen Platz zoomt heran, der zweite wählt ihn
+
+  <img src="../docs/shop-handy.png" width="300" alt="Saalplan auf dem Handy, herangezoomt">
 - Kompatibel mit der Content Security Policy von pretix (kein Inline-Code)
 
 ### Buchungsregeln (je Veranstaltung einstellbar)
@@ -45,7 +52,8 @@ diese Oberflächen liefert das Plugin.
 
   ![Gutschein](../docs/backend-gutschein.png)
 - **Ausdrucke (PDF):**
-  - *Saalliste* – Tisch für Tisch mit Namen, Bestellnummer, Status und Kästchen zum Abhaken am Einlass
+  - *Saalliste* – Tisch für Tisch mit Namen, Bestellnummer, Ticketart, Status und Kästchen zum Abhaken am Einlass;
+    Varianten mit Beschreibung (z. B. Ermäßigt) sind mit „Nachweis prüfen“ markiert
   - *Saalplan* (A4 oder A3) in Schwarz-Weiß, belegte Plätze grau, plus Liste der freien Plätze je Tisch – zum
     Verkauf an der Abendkasse
 

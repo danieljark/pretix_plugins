@@ -11,8 +11,11 @@
 .cs-werkzeuge { display: flex; gap: .4em; margin-bottom: .4em; }
 .cs-werkzeuge .btn { min-height: 44px; min-width: 44px; }
 
-.cs-flaeche { border: 1px solid #ccc; border-radius: 6px; max-height: 80vh; overflow: auto; background: #fff; }
-.cs-svg { display: block; height: auto; width: 100%; }
+.cs-flaeche { background: #fff; border: 1px solid #ccc; border-radius: 6px; height: 70vh; overflow: hidden; position: relative; }
+.cs-svg { display: block; height: 100%; touch-action: pan-y; user-select: none; width: 100%; }
+.cs-gezoomt .cs-svg { cursor: grab; touch-action: none; }
+.cs-gezoomt .cs-svg:active { cursor: grabbing; }
+.cs-zoom-hinweis { color: #555; font-size: .9em; margin: 0 0 .4em; }
 .cs-flaeche-form { fill-opacity: .18; }
 .cs-text { font-family: inherit; pointer-events: none; }
 
@@ -32,7 +35,7 @@
 .cs-option { display: inline-flex; align-items: center; gap: .3em; font-weight: normal; margin: 0 1em .3em 0; min-height: 32px; }
 
 .cs-auswahl { margin: 1em 0; }
-.cs-auswahl__liste { margin: 0; padding-left: 1.2em; }
+.cs-auswahl__liste { display: grid; gap: .6em; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); list-style: none; margin: 0; padding: 0; }
 .cs-entfernen { padding: 0 .3em; }
 
 .cs-regeln { color: #333; }
@@ -48,7 +51,13 @@
 .cs-absenden[disabled] { cursor: not-allowed; opacity: .55; }
 .cs-sitz--gutschein { stroke: #8a3000; }
 .cs-gutschein { border: 1px solid #ddd; border-radius: 6px; margin: .6em 0 1em; padding: .8em; }
-.cs-gutschein .cs-flaeche { max-height: 60vh; }
 .cs-gewaehlt:empty { display: none; }
-.cs-variante { display: inline-block; margin: .2em .4em; min-height: 36px; width: auto; }
-.cs-auswahl__liste li { margin-bottom: .3em; }
+.cs-variante { min-height: 40px; }
+.cs-posten { background: #f6f8fb; border: 1px solid #d5dde5; border-radius: 8px; padding: .6em .8em; }
+.cs-posten .cs-variante { display: block; margin: .4em 0; width: 100%; }
+.cs-posten__text { color: #333; font-size: .9em; margin: .3em 0; }
+.cs-posten__preis { font-weight: 600; margin-top: .3em; }
+.cs-posten .cs-entfernen { padding-left: 0; }
+
+.cs-varianten-hinweis { background: #eef4fa; border-left: 4px solid #0f4d80; margin: .6em 0 1em; padding: .5em .9em; }
+.cs-varianten-hinweis p { margin: .2em 0; }

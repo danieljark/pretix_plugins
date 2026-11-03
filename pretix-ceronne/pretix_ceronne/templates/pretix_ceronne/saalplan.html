@@ -5,7 +5,7 @@
   {% if frei %}
     <div class="cs-hilfe" id="cs-hilfe">
       {% if daten.gutschein_platz %}<p><strong>Dein Gutschein gilt für einen festen Platz – er ist bereits ausgewählt.</strong></p>{% endif %}
-      <p><span class="cs-frei-zahl">{{ frei }}</span> Plätze sind frei.
+      <p class="sr-only"><span class="cs-frei-zahl">{{ frei }}</span> Plätze sind frei.
         {% if regeln.tischmodus == 'nur_tische' %}Bei dieser Veranstaltung werden nur <strong>ganze Tische</strong> verkauft – ein Klick wählt den ganzen Tisch.
         {% else %}Klicke im Saalplan auf einen freien Platz{% if regeln.tischmodus == 'beides' %} oder auf ein Tischschild für den ganzen Tisch{% endif %}.{% endif %}
         <span class="cs-nur-js">Mit der Tastatur: Tab führt in den Plan, die Pfeiltasten wechseln den Platz,
@@ -20,6 +20,14 @@
     </div>
   {% else %}
     <p class="cs-hilfe"><strong>Für diese Veranstaltung sind keine Plätze mehr frei.</strong></p>
+  {% endif %}
+
+  {% if hinweise %}
+    <div class="cs-varianten-hinweis" id="cs-varianten-hinweis">
+      {% for name, text in hinweise.items %}
+        <p><strong>{{ name }}:</strong> {{ text|linebreaksbr }}</p>
+      {% endfor %}
+    </div>
   {% endif %}
 
   <ul class="cs-legende" aria-label="Legende">
@@ -46,6 +54,7 @@
     <button type="button" class="btn btn-default cs-zoom" data-zoom="0.6667" aria-label="Plan verkleinern">−</button>
     <button type="button" class="btn btn-default cs-zoom" data-zoom="0">Ganzer Saal</button>
   </div>
+  <p class="cs-zoom-hinweis cs-nur-js">Zoomen mit + und −, Strg/⌘ + Mausrad oder zwei Fingern; vergrößert lässt sich der Plan mit der Maus oder dem Finger verschieben.</p>
   <div class="cs-flaeche cs-nur-js" id="cs-flaeche"></div>
   {{ daten|json_script:"cs-daten" }}
 

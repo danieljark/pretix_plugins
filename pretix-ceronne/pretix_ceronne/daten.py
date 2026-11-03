@@ -22,16 +22,28 @@ def _buchbar(item, voucher):
     return item.is_available()
 
 
-def varianten(item, currency):
+def _preise(voucher, item, variation, preis, currency):
+    """Preis und – falls ein Gutschein den Preis ändert – neuer Preis, jeweils formatiert."""
+    neu = None
+    if voucher is not None and voucher.applies_to(item, variation):
+        neu = voucher.calculate_price(preis)
+    return {
+        'preis': money_filter(preis, currency),
+        'preis_neu': money_filter(neu, currency) if neu is not None and neu != preis else None,
+    }
+
+
+def varianten(item, currency, voucher=None):
     """Aktive Varianten eines Produkts (z. B. Standard/Ermäßigt) mit Preis; leer bei Produkten ohne Varianten."""
     if not item or not item.has_variations:
         return []
     return [
-        {
-            'id': v.pk,
-            'name': str(v.value),
-            'preis': money_filter(v.default_price if v.default_price is not None else item.default_price, currency),
-        }
+        dict(
+            id=v.pk,
+            name=str(v.value),
+            beschreibung=str(v.description).strip() if v.description else '',
+            **_preise(voucher, item, v, v.default_price if v.default_price is not None else item.default_price, currency),
+        )
         for v in item.variations.all() if v.active
     ]
 
@@ -83,7 +95,7 @@ def saalplan_daten(event, request=None, voucher=None, admin=False, mit_namen=Tru
         for op in OrderPosition.objects.filter(
             order__event=event, seat__isnull=False, subevent__isnull=True,
             order__status__in=[Order.STATUS_PENDING, Order.STATUS_PAID], canceled=False,
-        ).select_related('order', 'order__invoice_address', 'seat'):
+        ).select_related('order', 'order__invoice_address', 'seat', 'variation'):
             verkauft[op.seat.seat_guid] = {
                 'o': op.order.code,
                 'n': op.attendee_name or (op.order.invoice_address.name if hasattr(op.order, 'invoice_address') else '') or op.order.email or '',
@@ -91,11 +103,15 @@ def saalplan_daten(event, request=None, voucher=None, admin=False, mit_namen=Tru
                     'organizer': event.organizer.slug, 'event': event.slug, 'code': op.order.code,
                 }),
                 'bezahlt': op.order.status == Order.STATUS_PAID,
+                'v': str(op.variation.value) if op.variation else '',
+                # Varianten mit Beschreibung (z. B. Ermäßigt) brauchen am Einlass einen Nachweis
+                'nachweis': bool(op.variation and op.variation.description and str(op.variation.description).strip()),
             }
 
     farben = {k['name']: k.get('color') or '#999999' for k in layout.get('categories', [])}
     kategorien = {}
     produkt_varianten = {}
+    produkt_infos = {}
     plaetze = []
     for raw in plan.iter_all_seats():
         sitz = sitze.get(raw.guid)
@@ -121,7 +137,8 @@ def saalplan_daten(event, request=None, voucher=None, admin=False, mit_namen=Tru
         else:
             status = 'gesperrt'
         if buchbar and item.pk not in produkt_varianten:
-            produkt_varianten[item.pk] = varianten(item, event.currency)
+            produkt_varianten[item.pk] = varianten(item, event.currency, voucher)
+            produkt_infos[str(item.pk)] = dict(name=str(item.name), **_preise(voucher, item, None, item.default_price, event.currency))
         if raw.category not in kategorien:
             vs = produkt_varianten.get(item.pk) if buchbar else None
             if not buchbar:
@@ -167,6 +184,7 @@ def saalplan_daten(event, request=None, voucher=None, admin=False, mit_namen=Tru
         'plaetze': plaetze,
         'kategorien': list(kategorien.values()),
         'varianten': {str(k): v for k, v in produkt_varianten.items() if v},
+        'produkte': produkt_infos,
         # Gutschein mit festem Platz: keine Lücken-/Tischregeln, der Platz ist vorgegeben
         'regeln': {'tischmodus': 'einzeln', 'luecken': False, 'restplatz': False} if gutschein_platz else einstellungen(event),
         'gutschein_platz': gutschein_platz,
