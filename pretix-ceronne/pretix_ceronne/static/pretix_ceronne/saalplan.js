@@ -167,6 +167,15 @@
     });
     var nb = nachbarn(d.plaetze);
 
+    // pretix füllt bei nur einem weiteren Produkt (z. B. Stehplatz) die Menge mit „1“ vor – neben einem Saalplan würde
+    // so unbemerkt ein zusätzliches Ticket mitgekauft. Diese Vorbelegung zurücksetzen.
+    if (!admin) {
+      var formular = wurzel.closest('form');
+      if (formular) formular.querySelectorAll('input.input-item-count[value="1"], input[type=checkbox][name^="item_"][checked], input[type=checkbox][name^="variation_"][checked]').forEach(function (f) {
+        if (f.type === 'checkbox') f.checked = false; else f.value = '0';
+      });
+    }
+
     var titelEl = wurzel.querySelector('[id$="titel"]'), hilfeEl = wurzel.querySelector('[id$="hilfe"]');
     var svg = el('svg', { viewBox: sichtbarerBereich(d).join(' '), role: 'group', class: 'cs-svg' }, flaeche);
     if (titelEl) svg.setAttribute('aria-labelledby', titelEl.id);
